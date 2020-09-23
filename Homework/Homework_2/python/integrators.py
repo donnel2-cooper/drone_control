@@ -19,7 +19,7 @@ class Heun(Integrator):
         xe = intg.step(t, x, u) # Euler predictor step
         return x + 0.5*self.dt * (self.f(t, x, u) + self.f(t+self.dt, xe, u))
 
-class RK4(Integrator):
+class RungeKutta4(Integrator):
     def step(self, t, x, u):
         k1 = self.f(t,x,u)
         k2 = self.f(t+(self.dt/2),x+(self.dt*k1)/2,u)
