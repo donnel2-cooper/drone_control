@@ -5,6 +5,7 @@ import integrators as intg
 ## Aircraft Parameters (Aerosonde UAV)
 m = 13.5 #kg
 J = np.matrix([[0.8244,0,-0.1204],[0,1.135,0],[-0.1204,0,1.759]]) #kg*m^2
+J = np.matrix([[0.8244,0,0],[0,1.135,0],[0,0,1.759]]) #kg*m^2
 S = 0.55 #m^2
 b = 2.8956 #m
 c = 0.18994 #m
@@ -93,10 +94,10 @@ def f_pos(t, x, u):
 def f_vel(t, x, u):
     # Equation 3.15
     f_over_m = np.array([[u[0]/m],[u[1]/m],[u[2]/m]])
-    first_term = np.array([[x[11]*x[4]-x[10]*x[5]]\
-                           [x[9]*x[5]-x[11]*x[3]]\
+    first_term = np.array([[x[11]*x[4]-x[10]*x[5]],\
+                           [x[9]*x[5]-x[11]*x[3]],\
                            [x[10]*x[3]-x[9]*x[4]]])
-    summation = first_term + f_over_m
+    summation = np.add(first_term,f_over_m)
     return np.array([0,0,0,float(summation[0]),float(summation[1]),\
                      float(summation[2]),0,0,0,0,0,0])
 
@@ -118,33 +119,33 @@ def f_euler(t,x,u):
 
 def f_rate(t,x,u):
     # Equations 3.13
-    gamma = J[0,0]*J[2,2]-(-J[0,2])^2
+    gamma = J[0,0]*J[2,2]-(-J[0,2])**2
     gamma_1 = ((-J[0,2])*(J[0,0]-J[1,1]+J[2,2]))/gamma
-    gamma_2 = (J[2,2]*(J[2,2]-J[1,1])+(-J[0,2])^2)/gamma
+    gamma_2 = (J[2,2]*(J[2,2]-J[1,1])+(-J[0,2])**2)/gamma
     gamma_3 = J[2,2]/gamma
     gamma_4 = -J[0,2]/gamma
     gamma_5 = (J[2,2]-J[0,0])/J[1,1]
     gamma_6 = -J[0,2]/J[1,1]
-    gamma_7 = ((J[0,0]-J[1,1])*J[0,0]+(-J[0,2])^2)/gamma
+    gamma_7 = ((J[0,0]-J[1,1])*J[0,0]+(-J[0,2])**2)/gamma
     gamma_8 = J[0,0]/gamma
     #Equation 3.17
-    first_term = np.array([[gamma_1*x[9]*x[10]-gamma_2*x[10]*x[11]]\
-                           [gamma_5*x[9]*x[11]-gamma_6*(x[9]^2-x[11]^2)]\
+    first_term = np.array([[gamma_1*x[9]*x[10]-gamma_2*x[10]*x[11]],\
+                           [gamma_5*x[9]*x[11]-gamma_6*(x[9]**2-x[11]**2)],\
                            [gamma_7*x[9]*x[10]-gamma_1*x[10]*x[11]]])
-    second_term = np.array([[gamma_3*u[3]+gamma_4*u[5]]\
-                            [u[4]/J[1,1]]\
+    second_term = np.array([[gamma_3*u[3]+gamma_4*u[5]],\
+                            [u[4]/J[1,1]],\
                             [gamma_4*u[3]+gamma_8*u[5]]])
-    summation = first_term+second_term
+    summation = np.add(first_term,second_term)
     return np.array([0,0,0,0,0,0,0,0,0,float(summation[0]),\
                      float(summation[1]),float(summation[2])])
 
 
 ## Sim
 # Sim Parameters
-t0 = 0; tf = 30; dt = 0.01; n = int(np.floor(tf/dt));
+t0 = 0; tf = 20; dt = 0.01; n = int(np.floor(tf/dt));
 #Initial State and Initial Input
-x0 = np.array([0,0,0,10,0,0,0,0,0,0,0,0])
-u0 = np.array([0,0,0,0,0,0])
+x0 = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+u0 = np.array([0.0,0.0,0.0,0.0,0.0,0.0])
 
 # Define State Integrators as RK4 integrators on EOMs
 inertial_pos_intg = intg.RungeKutta4(dt,f_pos)
@@ -152,37 +153,28 @@ velocity_intg = intg.RungeKutta4(dt,f_vel)
 euler_angles_intg = intg.RungeKutta4(dt,f_euler)
 rates_intg = intg.RungeKutta4(dt,f_rate)
 
-inertial_pos_intg = intg.Euler(dt,f_pos)
-velocity_intg = intg.Euler(dt,f_vel)
-euler_angles_intg = intg.Euler(dt,f_euler)
-rates_intg = intg.Euler(dt,f_rate)
-
 x = x0
 u = u0
 t = t0
 t_history = [0]
 x_history = [x]
 
-n = 1
-
-
 # Sim Loop
 for i in range(n):
     # Step sim
     inertial_pos = inertial_pos_intg.step(t,x,u)
-    #velocity = velocity_intg.step(t,x,u)
-    #euler_angles = euler_angles_intg.step(t,x,u)
-    #rates = rates_intg.step(t,x,u)
+    velocity = velocity_intg.step(t,x,u)
+    euler_angles = euler_angles_intg.step(t,x,u)
+    rates = rates_intg.step(t,x,u)
     
     # Step time
     t = (i+1) * dt
     
     # Reconstruct State Vector
-    print(inertial_pos)
-    #print(velocity)
-    #print(euler_angles)
-    #print(rates)
-    
+    x = np.concatenate((inertial_pos[:3],velocity[3:6],euler_angles[6:9],rates[9:]))
+
     # Append State and Time to History
     t_history.append(t)
     x_history.append(x)
+    
+print(x)
