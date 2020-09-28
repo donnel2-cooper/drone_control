@@ -144,7 +144,7 @@ def f_rate(t,x,u):
 # Sim Parameters
 t0 = 0; tf = 20; dt = 0.01; n = int(np.floor(tf/dt));
 #Initial State and Initial Input
-x0 = np.array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+x0 = np.array([0.0,0.0,0.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
 u0 = np.array([0.0,0.0,0.0,0.0,0.0,0.0])
 
 # Define State Integrators as RK4 integrators on EOMs
