@@ -103,4 +103,5 @@ class aircraft():
         velocity = velocity_intg.step(t,x,u)
         euler_angles = euler_angles_intg.step(t,x,u)
         rates = rates_intg.step(t,x,u)
-        return np.concatenate((inertial_pos[:3],velocity[3:6],euler_angles[6:9],rates[9:]))
+        return np.concatenate((inertial_pos[:3],velocity[3:6],\
+                               euler_angles[6:9],rates[9:]))
