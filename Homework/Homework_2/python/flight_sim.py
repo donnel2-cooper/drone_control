@@ -22,7 +22,11 @@ class aircraft():
     #   t: time
     #                              0   1   2  3  4  5    6      7    8  9 10 11
     #   x: state vector in book, [pn, pe, pd, u, v, w, phi, theta, psi, p, q, r]
+    #       pn, pe, pd iniertial frame positions
     #       u, v, w ground speeds 
+    #       phi, theta, psi Euler angles (in degrees)
+    #       p, q, r angular rates (in dps)
+    #
     #               0  1  2  3  4  5
     #   u: input, [fx,fy,fz, l, m, n]
     def f_pos(self,t, x, u):
@@ -90,6 +94,7 @@ class aircraft():
                          float(summation[1]),float(summation[2])])
             
     def step(self,t,x,u,dt = 0.01):
+        # Integrate vehicle state forward one time step dt
         inertial_pos_intg = intg.RungeKutta4(dt,self.f_pos)
         velocity_intg = intg.RungeKutta4(dt,self.f_vel)
         euler_angles_intg = intg.RungeKutta4(dt,self.f_euler)
