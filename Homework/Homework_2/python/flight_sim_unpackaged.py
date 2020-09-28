@@ -86,7 +86,9 @@ def f_pos(t, x, u):
                     sind(x[6])*cosd(x[7]),\
                     cosd(x[6])*cosd(x[7])]])
     substate = np.array([[x[3]],[x[4]],[x[5]]])
-    return np.matmul(R,substate)
+    mat_mult_result = np.matmul(R,substate)
+    return np.array([float(mat_mult_result[0]),float(mat_mult_result[1]),\
+                     float(mat_mult_result[2]),0,0,0,0,0,0,0,0,0])
 
 def f_vel(t, x, u):
     # Equation 3.15
@@ -94,7 +96,9 @@ def f_vel(t, x, u):
     first_term = np.array([[x[11]*x[4]-x[10]*x[5]]\
                            [x[9]*x[5]-x[11]*x[3]]\
                            [x[10]*x[3]-x[9]*x[4]]])
-    return first_term + f_over_m
+    summation = first_term + f_over_m
+    return np.array([0,0,0,float(summation[0]),float(summation[1]),\
+                     float(summation[2]),0,0,0,0,0,0])
 
 def f_euler(t,x,u):
     # Equation 3.16
@@ -108,7 +112,9 @@ def f_euler(t,x,u):
                     sind(x[6])/cosd(x[7]),\
                     cosd(x[6])/cosd(x[7])]])
     substate = np.array([[x[9]],[x[10]],[x[11]]])
-    return np.matmul(R,substate)
+    mat_mul_result = np.matmul(R,substate)
+    return np.array([0,0,0,0,0,0,float(mat_mul_result[0]),\
+                     float(mat_mul_result[1]),float(mat_mul_result[2]),0,0,0])
 
 def f_rate(t,x,u):
     # Equations 3.13
@@ -128,7 +134,9 @@ def f_rate(t,x,u):
     second_term = np.array([[gamma_3*u[3]+gamma_4*u[5]]\
                             [u[4]/J[1,1]]\
                             [gamma_4*u[3]+gamma_8*u[5]]])
-    return first_term+second_term
+    summation = first_term+second_term
+    return np.array([0,0,0,0,0,0,0,0,0,float(summation[0]),\
+                     float(summation[1]),float(summation[2])])
 
 
 ## Sim
@@ -162,15 +170,15 @@ n = 1
 for i in range(n):
     # Step sim
     inertial_pos = inertial_pos_intg.step(t,x,u)
-    velocity = velocity_intg.step(t,x,u)
-    euler_angles = euler_angles_intg.step(t,x,u)
-    rates = rates_intg.step(t,x,u)
+    #velocity = velocity_intg.step(t,x,u)
+    #euler_angles = euler_angles_intg.step(t,x,u)
+    #rates = rates_intg.step(t,x,u)
     
     # Step time
     t = (i+1) * dt
     
     # Reconstruct State Vector
-   # print(inertial_pos)
+    print(inertial_pos)
     #print(velocity)
     #print(euler_angles)
     #print(rates)
