@@ -27,29 +27,22 @@ class RigidBody:
         # Compute equations of motion
         # d/dt(r_i) 
         rdot_i = R_ib @ v_b
+        
         # d/dt(v_b)
         vdot_b = (1/self.m)*f_b-skew(w_b) @ v_b
+        
         # d/dt(q_ib)
         wq_ib = np.zeros((4,1))
         wq_ib[1:] = w_b
-        #wq_ib = np.insert(w_b,0,[0])
-        #wq_ib.reshape()
-        #print(wq_ib.shape)
-        #wq_ib[1:] = w_b
-        # print("npzero = ",np.array([[0]]),"wb = ", w_b)
-        # wq_ib = np.concatenate((np.array([[0]]),w_b),axis=0)
         
         # wq_ib = wq_ib.T
         qdot_ib = 0.5 * quat_prod(wq_ib, q_ib)
         wt_b = skew(w_b)
         
         # d/dt(w_b)
-        #print(m_b)
-        #print((wt_b @ self.J @ w_b).flatten())
         wdot_b = np.linalg.inv(self.J) @ (m_b - wt_b @ self.J @ w_b)
         
-        # x_out = np.concatenate([rdot_i,vdot_b,qdot_ib,wdot_b],axis = 0)
-        x_out = np.concatenate([rdot_i,vdot_b,qdot_ib,np.array(wdot_b)])
+        x_out = np.concatenate([rdot_i,vdot_b,qdot_ib,np.array(wdot_b)],axis = 0)
         return x_out
         
         
