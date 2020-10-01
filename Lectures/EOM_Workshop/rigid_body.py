@@ -34,13 +34,15 @@ class RigidBody:
         # d/dt(q_ib)
         wq_ib = np.zeros((4,1))
         wq_ib[1:] = w_b
+        print(np.rad2deg(wq_ib))
         
         # wq_ib = wq_ib.T
         qdot_ib = 0.5 * quat_prod(wq_ib, q_ib)
         wt_b = skew(w_b)
         
         # d/dt(w_b)
-        wdot_b = np.linalg.inv(self.J) @ (m_b - wt_b @ self.J @ w_b)
+        wdot_b = np.linalg.inv(self.J) @ (m_b - (wt_b @ (self.J @ w_b)))
+        print(wdot_b)
         
         x_out = np.concatenate([rdot_i,vdot_b,qdot_ib,np.array(wdot_b)],axis = 0)
         return x_out
@@ -63,9 +65,9 @@ def skew(a):
     #a = np.flatten(a) # convert to 3-array
     a = a.flatten()
     return np.array([
-        [    0, -a[2],  a[1]],
-        [ a[2],     0, -a[0]],
-        [-a[1],    a[0],     0]
+        [    0,  -a[2],  a[1]],
+        [ a[2],     0,  -a[0]],
+        [-a[1],   a[0],     0]
         ])   
 
 def rot_from_quat(q):
@@ -83,7 +85,8 @@ def quat_prod(p, q):
     P = np.zeros((4,4))
     P[0, 0] = p0; P[0, 1:] = -p.T
     P[1:, 0] = p.flatten()
-    P[1:, 1:] = skew(p) + p0*np.eye(3)
+    P[1:, 1:] = -skew(p) + p0*np.eye(3)
+    print(np.rad2deg(P))
     return P @ q 
 
 def quat_from_ypr(y, p, r):
