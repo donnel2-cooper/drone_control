@@ -30,7 +30,7 @@ t_history = [0]
 x_history = [x]
 
 for i in range(n):
-    x = integrator.step(t, x, u)
+    x = integrator.step(t, drone.x, u)
     t = (i+1) * dt
     t_history.append(t)
     x_history.append(x)
@@ -41,6 +41,7 @@ for i in range(n):
 
 print(x)
 print(np.rad2deg(rb.get_euler_angles_from_rot(rb.rot_from_quat(x[6:10]))))
+print(all(x == drone.x))
 
 t_ = np.asarray(t_history)
 x_ = np.asarray(x_history)

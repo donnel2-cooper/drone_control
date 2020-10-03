@@ -34,8 +34,6 @@ class RigidBody:
         # d/dt(q_ib)
         wq_ib = np.zeros((4,1))
         wq_ib[1:] = w_b
-        
-        # wq_ib = wq_ib.T
         qdot_ib = 0.5 * quat_prod(wq_ib, q_ib)
         wt_b = skew(w_b)
         
