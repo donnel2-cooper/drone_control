@@ -11,44 +11,34 @@ quat0 = rb.quat_from_ypr(yaw0,pitch0,roll0)
 
 #x0 = np.array([0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,0.0,0.0, 0.0,0.0,0.0])
 
-R = 1
-omega = 2*np.pi/10
-
-vy_i = omega*R
-fx_i = (vy_i^2/R)/uav.m
-
-x0 = np.array([R,0.0,0.0,\
-               0.0,0.0,0.0,\
+x0 = np.array([0.0,0.0,0.0,\
+               2.0,2.0,27.0,\
                float(quat0[0]),float(quat0[1]),float(quat0[2]),float(quat0[3]),\
                np.deg2rad(0),np.deg2rad(0),np.deg2rad(0)])
 x0 = x0.reshape(x0.shape[0],1)
 
 drone = rb.RigidBody(uav.m,uav.J,x0)
 
-t0 = 0
-u0 = np.array([fx_i,0.0,0.0, 0.0,0.0,0.0])
-u0 = u0.reshape(u0.shape[0],1)
+t = 0
+u = np.array([0.0,0.0,-drone.m*32.174, 0.0,0.0,0.0])
+u = u.reshape(u.shape[0],1)
 
 tf = 2*x0[5]/32.174; dt = 1e-3; n = int(np.floor(tf/dt));
 integrator = intg.RungeKutta4(dt, drone.f)
 
 x = x0
-t = t0
-u = u0
 t_history = [0]
 x_history = [x]
 
 for i in range(n):
-    x = integrator.step(t, drone.x, u0)
+    x = integrator.step(t, drone.x, u)
     t = (i+1) * dt
     t_history.append(t)
     x_history.append(x)
     
     #Update drone state
     drone.x = x
-    
-    #Update force
-    
+    #print(drone.x)
 
 
 print(x)
@@ -74,3 +64,19 @@ plt.xlabel('t')
 plt.ylabel('v_y')
 plt.legend()
 plt.show()
+
+plt.figure()
+plt.plot(t_history, x_[:,5],'rx')
+plt.xlabel('t')
+plt.ylabel('v_z')
+plt.legend()
+plt.show()
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(x_[:,0], x_[:,1],x_[:,2])
+plt.xlabel('d_x')
+plt.ylabel('d_y')
+plt.zlabel('d_z')
+plt.legend()
+ax.show()

@@ -70,7 +70,6 @@ def rot_from_quat(q):
     """Compute rotation matrix from quaternion.
     quaternion must be provided in form [q0, q]
     """    
-    #q = np.flatten(q)
     q = q.flatten()
     q0 = q[0]
     q = q[1:]
@@ -82,7 +81,7 @@ def quat_prod(p, q):
     P[0, 0] = p0; P[0, 1:] = -p.T
     P[1:, 0] = p.flatten()
     P[1:, 1:] = skew(p) + p0*np.eye(3)
-    return P @ q 
+    return P @ q
 
 def quat_from_ypr(y, p, r):
     psi2 = y/2
