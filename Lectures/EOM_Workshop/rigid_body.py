@@ -80,7 +80,7 @@ def quat_prod(p, q):
     P = np.zeros((4,4))
     P[0, 0] = p0; P[0, 1:] = -p.T
     P[1:, 0] = p.flatten()
-    P[1:, 1:] = skew(p) + p0*np.eye(3)
+    P[1:, 1:] = -skew(p) + p0*np.eye(3)
     return P @ q
 
 def quat_from_ypr(y, p, r):
