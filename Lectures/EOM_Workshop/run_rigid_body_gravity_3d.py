@@ -12,7 +12,7 @@ quat0 = rb.quat_from_ypr(yaw0,pitch0,roll0)
 #x0 = np.array([0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,0.0,0.0,0.0, 0.0,0.0,0.0])
 
 x0 = np.array([0.0,0.0,0.0,\
-               2.0,2.0,27.0,\
+               10,10,10.0,\
                float(quat0[0]),float(quat0[1]),float(quat0[2]),float(quat0[3]),\
                np.deg2rad(0),np.deg2rad(0),np.deg2rad(0)])
 x0 = x0.reshape(x0.shape[0],1)
@@ -52,31 +52,18 @@ x_ = np.asarray(x_history)
 plt.close('all')
 
 plt.figure()
-plt.plot(t_history, x_[:,3],'rx')
+plt.plot(t_history, x_[:,3],label = 'u')
+plt.plot(t_history, x_[:,4],label = 'v')
+plt.plot(t_history, x_[:,5],label = 'w')
 plt.xlabel('t')
-plt.ylabel('v_x')
-plt.legend()
-plt.show()
-
-plt.figure()
-plt.plot(t_history, x_[:,4],'rx')
-plt.xlabel('t')
-plt.ylabel('v_y')
-plt.legend()
-plt.show()
-
-plt.figure()
-plt.plot(t_history, x_[:,5],'rx')
-plt.xlabel('t')
-plt.ylabel('v_z')
+plt.ylabel('v')
 plt.legend()
 plt.show()
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(x_[:,0], x_[:,1],x_[:,2])
+ax.scatter(x_[:,0], x_[:,1],x_[:,2],'b',label = 'traj')
 plt.xlabel('d_x')
 plt.ylabel('d_y')
-plt.zlabel('d_z')
 plt.legend()
 ax.show()

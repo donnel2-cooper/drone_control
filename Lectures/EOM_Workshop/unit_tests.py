@@ -9,7 +9,7 @@ def within_tol(a,b,tol):
     else:
         return False
 
-## Init checks matrix
+## Init checks array
 checks = [True]
 
 ## Specify tol on checks
