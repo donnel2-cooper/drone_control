@@ -16,12 +16,14 @@ for x in range(len(modes_lon)):
     mode = modes_lon[:,x]
     for y in range(len(mode)):
         plt.polar([0,np.angle(mode[y])],[0,abs(mode[y])],marker='o')
+    plt.legend(['u','alpha/w','q','theta','h'])
 
 for x in range(len(modes_lat)):
     plt.figure()
     mode = modes_lat[:,x]
     for y in range(len(mode)):
         plt.polar([0,np.angle(mode[y])],[0,abs(mode[y])],marker='o')
+    plt.legend(['beta/v','p','r','phi','psi'])
 
 plt.figure()
 plt.scatter([temp.real for temp in poles_lon],[temp.imag for temp in poles_lon],marker = 'x')
