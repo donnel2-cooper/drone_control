@@ -150,32 +150,32 @@ class mavDynamics:
         self._beta = np.arcsin(vr/self._Va)
 
 
-    def thrust_from_prop(delta_t)
-            # compute t h r u s t and torque due to p r o p ell e r ( See addendum by McLain)
-            # map d e l t a t t h r o t t l e command(0 t o 1) i n t o motor i n p u t v o l t a g e
-            V_in = MAV.V max * delta_t
-            KQ = MAV.KQ
-            
-            # Quadratic formula to solve for motor speed
-            a = MAV.C_Q0 * MAV.rho * np.power (MAV.D_prop, 5) \
-            / ((2. * np.pi )**2 )
-            b = (MAV.C_Q1 * MAV.rho * np.power (MAV.D_prop, 4)
-            / (2. * np.pi ) ) * self._Va + KQ**2/MAV.R_motor
-            c = MAV.C_Q2 * MAV.rho * np.power (MAV.D_prop, 3) \
-            * self._Va**2  (KQ / MAV.R_motor ) * V_in + KQ * MAV.i 0
-            # Consider only positive root
-            Omega_op = (b + np.sqrt(b**2 - 4*a* c)) / (2. * a )
-            # compute advance rat io
-            J_op = 2 * np.pi * self._Va / (Omega_op * MAV.D_prop)
-            # compute nond imens ional ized c o e f f i c i e n t s of thrus t and torque
-            C_T = MAV.C_T2 * J_op **2 + MAV.C_T1 * J_op + MAV.C_T0
-            C_Q = MAV.C_Q2 * J_op **2 + MAV.C_Q1 * J_op + MAV.C_Q0
-            # add thrus t and torque due to pr o peller
-            n = Omega_op / (2 * np.pi )
-            fx += MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
-            Mx += MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
-            
-            return fx,Mx
+    def thrust_from_prop(delta_t):
+        # compute t h r u s t and torque due to p r o p ell e r ( See addendum by McLain)
+        # map d e l t a t t h r o t t l e command(0 t o 1) i n t o motor i n p u t v o l t a g e
+        V_in = MAV.V_max * delta_t
+        KQ = MAV.KQ
+        
+        # Quadratic formula to solve for motor speed
+        a = MAV.C_Q0 * MAV.rho * np.power(MAV.D_prop, 5) \
+        / ((2. * np.pi )**2 )
+        b = (MAV.C_Q1 * MAV.rho * np.power (MAV.D_prop, 4)
+        / (2. * np.pi ) ) * self._Va + KQ**2/MAV.R_motor
+        c = MAV.C_Q2 * MAV.rho * np.power (MAV.D_prop, 3) \
+        * self._Va**2  (KQ / MAV.R_motor ) * V_in + KQ * MAV.i0
+        # Consider only positive root
+        Omega_op = (b + np.sqrt(b**2 - 4*a* c)) / (2. * a )
+        # compute advance rat io
+        J_op = 2 * np.pi * self._Va / (Omega_op * MAV.D_prop)
+        # compute nond imens ional ized c o e f f i c i e n t s of thrus t and torque
+        C_T = MAV.C_T2 * J_op **2 + MAV.C_T1 * J_op + MAV.C_T0
+        C_Q = MAV.C_Q2 * J_op **2 + MAV.C_Q1 * J_op + MAV.C_Q0
+        # add thrus t and torque due to pr o peller
+        n = Omega_op / (2 * np.pi )
+        fx += MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
+        Mx += MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
+        
+        return fx,Mx
 
 
 
