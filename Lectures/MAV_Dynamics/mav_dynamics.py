@@ -176,10 +176,26 @@ class mavDynamics:
         Mx += MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
         
         return fx,Mx
-
-
-
-
+    
+    def sigma(alpha):
+        # pseudo sigmoid functions with cutoff +- alpha_0, returns coef btw 0 and 1
+        a1 = -MAV.M * (alpha - MAV.alpha0)
+        a2 = MAV.M * (alpha + MAV.alpha0)
+        sigma_alpha = (1 + np.exp(a1)+np.exp(a2)) / ((1+np.exp(a1))*(1+np.exp(a2)))
+        return sigma_alpha
+    
+    def Cl(alpha):
+        CL0 = MAV.C_L_0
+        CLA = MAV.C_L_alpha
+        sigma_alpha = sigma(alpha)
+        # returns lift coefficient using eq 4.9
+        CL_alpha = (1-sigma_alpha)*(CL0 + CLA*alpha) + sigma_alpha*(2*np.sign(alpha)*np.sin(alpha)**2 * np.cos(alpha))
+        return CL_alpha
+    
+    def Cd(alpha):
+        # returns drag coefficient using eq 4.11
+        
+        return CD_alpha
 
 
     def _forces_moments(self, delta):
@@ -198,16 +214,21 @@ class mavDynamics:
         delta_r = delta.item(2)
         delta_t = delta.item(3)
         
+        # Gravitational Components of Force, Moments = 0
         mg = MAV.mass*MAV.gravity
         fx_grav = -mg*np.sin(theta)
         fy_grav = mg* np.cos(theta) * np.sin(phi)
         fz_grav = mg* np.cos(theta) * np.cos(phi)
                     
+        # Thrust Components of Force and Moments
         fx_thrust,Mx_thrust = thrust_from_prop(delta_t)
         fy_thrust = 0
         fz_thrust = 0
+        My_thrust = 0
+        Mz_thrust = 0
         
         
+        # Aerodynamic Components of Forces and Moments
         b = MAV.b
         cyp = MAV.C_Y_p
         cyr = MAV.C_Y_r
@@ -215,20 +236,20 @@ class mavDynamics:
         cydeltar = MAV.C_Y_delta_r
                 
         
-        
         aero_coef = 0.5*MAV.rho*self._Va**2*MAV.S_wing
-        fx_aero = 
+        fx_aero = aero_coef * ()
         fy_aero = aero_coef * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta + MAV.C_Y_p*b/(2*self._Va)*p + cyr * b/(2*self._Va)*r + cydeltaa * delta_a + cydeltar* delta_r)
-        fz_aero = 
-        
-        
+        fz_aero =  
+        Mx_aero = 
+        My_aero = 
+        Mz_aero = 
 
-        fx = 
-        fy = MAV.mass*
-        fz =
-        Mx =
-        My =
-        Mz =
+        fx = fx_grav + fx_aero +　fx_thrust
+        fy = fy_grav + fy_aero +　fy_thrust
+        fz =　fz_grav + fz_aero +　fz_thrust
+        Mx = Mx_aero +　Mx_thrust
+        My = My_aero +　My_thrust
+        Mz = Mz_aero +　Mz_thrust
 
         self._forces[0] = fx
         self._forces[1] = fy
