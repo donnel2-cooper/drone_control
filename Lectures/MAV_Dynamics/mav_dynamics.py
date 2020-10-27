@@ -249,8 +249,8 @@ class mavDynamics:
         fy_aero = aero_coef * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta + MAV.C_Y_p*b/(2*self._Va)*p + cyr * b/(2*self._Va)*r + cydeltaa * delta_a + cydeltar* delta_r)
         fz_aero = aero_coef * (self.Cz(self._alpha) + self.Cz_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cz_deltae(self._alpha)*delta_e)
         Mx_aero = 
-        My_aero = 
-        Mz_aero = aero_coef * MAV.b* (MAV.C_n_0 + MAV.C_n_beta*self._beta + MAV.C_n_p*MAV.b/(2*self._Va)*p + MAV.C_n_r*MAV.b/(2*self._Va)*r + MAV.C_n_delta_a*delta_a + MAV.C_n_delta_r*delta_r
+        My_aero = aero_coef * MAV.c * (MAV.C_m_0 + MAV.C_m_alpha*self._alpha + MAV.C_m_q*MAV.c/(2*self._Va)*q + MAV.C_m_delta_e*delta_e)
+        Mz_aero = aero_coef * MAV.b* (MAV.C_n_0 + MAV.C_n_beta*self._beta + MAV.C_n_p*MAV.b/(2*self._Va)*p + MAV.C_n_r*MAV.b/(2*self._Va)*r + MAV.C_n_delta_a*delta_a + MAV.C_n_delta_r*delta_r)
 
         fx = fx_grav + fx_aero +　fx_thrust
         fy = fy_grav + fy_aero +　fy_thrust
