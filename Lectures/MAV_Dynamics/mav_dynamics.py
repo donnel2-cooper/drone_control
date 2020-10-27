@@ -18,7 +18,7 @@ from message_types.msg_state import msgState
 
 import parameters.aerosonde_parameters as MAV
 from tools.rotations import Quaternion2Rotation, Quaternion2Euler, skew, quat_prod
-
+import mavsim_python_chap5_model_coef as chap5
 
 class mavDynamics:
     def __init__(self, Ts):
@@ -30,18 +30,19 @@ class mavDynamics:
         # self.true_state is a 19x1 vector that is estimated and used by the autopilot to control the aircraft:
         # true_state = [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
         self._state = np.array([[MAV.pn0],  # (0)
-                               [MAV.pe0],   # (1)
-                               [MAV.pd0],   # (2)
-                               [MAV.u0],    # (3)
-                               [MAV.v0],    # (4)
-                               [MAV.w0],    # (5)
-                               [MAV.e0],    # (6)
-                               [MAV.e1],    # (7)
-                               [MAV.e2],    # (8)
-                               [MAV.e3],    # (9)
-                               [MAV.p0],    # (10)
-                               [MAV.q0],    # (11)
-                               [MAV.r0]])   # (12)
+                                [MAV.pe0],   # (1)
+                                [MAV.pd0],   # (2)
+                                [MAV.u0],    # (3)
+                                [MAV.v0],    # (4)
+                                [MAV.w0],    # (5)
+                                [MAV.e0],    # (6)
+                                [MAV.e1],    # (7)
+                                [MAV.e2],    # (8)
+                                [MAV.e3],    # (9)
+                                [MAV.p0],    # (10)
+                                [MAV.q0],    # (11)
+                                [MAV.r0]])   # (12)
+        
         # store wind data for fast recall since it is used at various points in simulation
         self._wind = np.array([[0.], [0.], [0.]])  # wind in NED frame in meters/sec
         self._update_velocity_data()
@@ -105,7 +106,6 @@ class mavDynamics:
         """
         for the dynamics xdot = f(x, u), returns fdot(x, u)
         """
-        
         # Get force, moment (torque)
         f_b = u[:3]
         m_b = u[3:]
@@ -124,7 +124,7 @@ class mavDynamics:
         rdot_i = R_ib @ v_b
         
         # d/dt(v_b)
-        vdot_b = (1/self.m)*f_b-skew(w_b) @ v_b
+        vdot_b = (1/MAV.mass)*f_b-skew(w_b) @ v_b
         
         # d/dt(q_ib)
         wq_ib = np.zeros((4,1))
@@ -133,7 +133,7 @@ class mavDynamics:
         wt_b = skew(w_b)
         
         # d/dt(w_b)
-        wdot_b = np.linalg.inv(self.J) @ (m_b - (wt_b @ (self.J @ w_b)))
+        wdot_b = np.linalg.inv(MAV.J) @ (m_b - (wt_b @ (MAV.J @ w_b)))
         
         x_out = np.concatenate([rdot_i,vdot_b,qdot_ib,np.array(wdot_b)],axis = 0)
         return x_out
@@ -162,7 +162,7 @@ class mavDynamics:
         b = (MAV.C_Q1 * MAV.rho * np.power (MAV.D_prop, 4)
         / (2. * np.pi ) ) * self._Va + KQ**2/MAV.R_motor
         c = MAV.C_Q2 * MAV.rho * np.power (MAV.D_prop, 3) \
-        * self._Va**2  (KQ / MAV.R_motor ) * V_in + KQ * MAV.i0
+        * self._Va**2 - (KQ / MAV.R_motor ) * V_in + KQ * MAV.i0
         # Consider only positive root
         Omega_op = (b + np.sqrt(b**2 - 4*a* c)) / (2. * a )
         # compute advance ratio
@@ -177,7 +177,7 @@ class mavDynamics:
         
         return fx,Mx
     
-    def sigma(alpha):
+    def sigma(self,alpha):
         # pseudo sigmoid functions with cutoff +- alpha_0, returns coef btw 0 and 1
         a1 = -MAV.M * (alpha - MAV.alpha0)
         a2 = MAV.M * (alpha + MAV.alpha0)
@@ -192,7 +192,7 @@ class mavDynamics:
         CL_alpha = (1-sigma_alpha)*(CL0 + CLA*alpha) + sigma_alpha*(2*np.sign(alpha)*np.sin(alpha)**2 * np.cos(alpha))
         return CL_alpha
     
-    def CD(alpha):
+    def CD(self,alpha):
         # returns drag coefficient using eq 4.11
         CD_alpha = MAV.C_D_p + (MAV.C_L_0 + MAV.C_L_alpha*alpha)**2/(np.pi*MAV.e*MAV.AR)
         return CD_alpha
@@ -200,19 +200,19 @@ class mavDynamics:
     def Cx(self,alpha):
         return -self.CD(alpha)*np.cos(alpha) + self.CL(alpha)*np.sin(alpha)
     
-    def Cx_q(alpha):
+    def Cx_q(self,alpha):
         return -MAV.C_D_q*np.cos(alpha) + MAV.C_L_q*np.sin(alpha)
     
-    def Cx_deltae(alpha):
+    def Cx_deltae(self,alpha):
         return -MAV.C_D_delta_e*np.cos(alpha) + MAV.C_L_delta_e*np.sin(alpha)
     
     def Cz(self,alpha):
         return -self.CD(alpha)*np.sin(alpha)-self.CL(alpha)*np.cos(alpha)
     
-    def Cz_q(alpha):
+    def Cz_q(self,alpha):
         return -MAV.C_D_q*np.sin(alpha)-MAV.C_L_q*np.cos(alpha)
     
-    def Cz_deltae(alpha):
+    def Cz_deltae(self,alpha):
         return -MAV.C_D_delta_e*np.sin(alpha)-MAV.C_L_delta_e*np.cos(alpha)
     
     def _forces_moments(self, delta):
@@ -244,7 +244,6 @@ class mavDynamics:
         My_thrust = 0
         Mz_thrust = 0
         
-        
         # Aerodynamic Components of Forces and Moments
         b = MAV.b
         cyp = MAV.C_Y_p
@@ -252,7 +251,6 @@ class mavDynamics:
         cydeltaa = MAV.C_Y_delta_a
         cydeltar = MAV.C_Y_delta_r
                 
-        
         aero_coef = 0.5*MAV.rho*self._Va**2*MAV.S_wing
         fx_aero = aero_coef * (self.Cx(self._alpha) + self.Cx_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cx_deltae(self._alpha)*delta_e)
         fy_aero = aero_coef * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta + MAV.C_Y_p*b/(2*self._Va)*p + cyr * b/(2*self._Va)*r + cydeltaa * delta_a + cydeltar* delta_r)
@@ -261,8 +259,13 @@ class mavDynamics:
         My_aero = aero_coef * MAV.c * (MAV.C_m_0 + MAV.C_m_alpha*self._alpha + MAV.C_m_q*MAV.c/(2*self._Va)*q + MAV.C_m_delta_e*delta_e)
         Mz_aero = aero_coef * MAV.b * (MAV.C_n_0 + MAV.C_n_beta*self._beta + MAV.C_n_p*MAV.b/(2*self._Va)*p + MAV.C_n_r*MAV.b/(2*self._Va)*r + MAV.C_n_delta_a*delta_a + MAV.C_n_delta_r*delta_r)
         
+        print('fx_aero = ',fx_aero)
+        print('fx_grav = ',fx_grav)
+        print('fx_thrust = ',fx_thrust)
+        
         
         fx = fx_grav + fx_aero + fx_thrust
+        print('fx = ',fx)
         fy = fy_grav + fy_aero + fy_thrust
         fz = fz_grav + fz_aero + fz_thrust
         Mx = Mx_aero + Mx_thrust
@@ -272,7 +275,8 @@ class mavDynamics:
         self._forces[0] = fx
         self._forces[1] = fy
         self._forces[2] = fz
-        return np.array([[fx, fy, fz, Mx, My, Mz]]).T
+        fm = np.reshape(np.array([fx, fy, fz, Mx, My, Mz]),[6,1])
+        return fm
 
     def _update_true_state(self):
         # update the class structure for the true state:
@@ -297,22 +301,3 @@ class mavDynamics:
         self.true_state.wn = self._wind.item(0)
         self.true_state.we = self._wind.item(1)
         
-        
-    
-        
-    def rot_from_quat(q):
-        """Compute rotation matrix from quaternion.
-        quaternion must be provided in form [q0, q]
-        """    
-        q = q.flatten()
-        q0 = q[0]
-        q = q[1:]
-        return (q0**2 - np.dot(q, q))*np.eye(3) + 2*np.outer(q,q) + 2*q0*skew(q)
-     
-    def quat_prod(p, q):
-        p0 = p[0]; p = p[1:4]
-        P = np.zeros((4,4))
-        P[0, 0] = p0; P[0, 1:] = -p.T
-        P[1:, 0] = p.flatten()
-        P[1:, 1:] = -skew(p) + p0*np.eye(3)
-        return P @ q
