@@ -153,18 +153,16 @@ class mavDynamics:
     def thrust_from_prop(self, delta_t):
         # compute thrust and torque due to propeller (See addendum by McLain)
         # map delta_t throttle command (0 to 1) into motor input voltage
+            
         V_in = MAV.V_max * delta_t
         KQ = MAV.KQ
         
         # Quadratic formula to solve for motor speed
-        a = MAV.C_Q0 * MAV.rho * np.power(MAV.D_prop, 5) \
-        / ((2. * np.pi )**2 )
-        b = (MAV.C_Q1 * MAV.rho * np.power (MAV.D_prop, 4)
-        / (2. * np.pi ) ) * self._Va + KQ**2/MAV.R_motor
-        c = MAV.C_Q2 * MAV.rho * np.power (MAV.D_prop, 3) \
-        * self._Va**2 - (KQ / MAV.R_motor ) * V_in + KQ * MAV.i0
+        a = MAV.C_Q0 * MAV.rho * np.power(MAV.D_prop, 5) / ((2. * np.pi )**2 )
+        b = (MAV.C_Q1 * MAV.rho * np.power(MAV.D_prop, 4) / (2.*np.pi)) * self._Va + KQ**2/MAV.R_motor
+        c = MAV.C_Q2 * MAV.rho * np.power(MAV.D_prop, 3) * self._Va**2 - (KQ / MAV.R_motor ) * V_in + KQ * MAV.i0
         # Consider only positive root
-        Omega_op = (b + np.sqrt(b**2 - 4*a* c)) / (2. * a )
+        Omega_op = (-b + np.sqrt(b**2 - 4*a* c)) / (2. * a )
         # compute advance ratio
         J_op = 2 * np.pi * self._Va / (Omega_op * MAV.D_prop)
         # compute nondimensionalized coefficients of thrust and torque
@@ -174,7 +172,6 @@ class mavDynamics:
         n = Omega_op / (2 * np.pi )
         fx = MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
         Mx = MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
-        
         return fx,Mx
     
     def sigma(self,alpha):
