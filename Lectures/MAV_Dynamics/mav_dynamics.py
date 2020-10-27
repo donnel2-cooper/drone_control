@@ -256,11 +256,6 @@ class mavDynamics:
         self._forces[2] = fz
         return np.array([[fx, fy, fz, Mx, My, Mz]]).T
 
-    def _motor_thrust_torque(self, Va, delta_t):
-
-        return T_p, Q_p
-
-
     def _update_true_state(self):
         # update the class structure for the true state:
         #   [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
