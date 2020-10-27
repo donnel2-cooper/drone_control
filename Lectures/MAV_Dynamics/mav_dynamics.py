@@ -184,7 +184,7 @@ class mavDynamics:
         sigma_alpha = (1 + np.exp(a1)+np.exp(a2)) / ((1+np.exp(a1))*(1+np.exp(a2)))
         return sigma_alpha
     
-    def Cl(alpha):
+    def CL(alpha):
         CL0 = MAV.C_L_0
         CLA = MAV.C_L_alpha
         sigma_alpha = sigma(alpha)
@@ -192,13 +192,22 @@ class mavDynamics:
         CL_alpha = (1-sigma_alpha)*(CL0 + CLA*alpha) + sigma_alpha*(2*np.sign(alpha)*np.sin(alpha)**2 * np.cos(alpha))
         return CL_alpha
     
-    def Cd(alpha):
+    def CD(alpha):
         # returns drag coefficient using eq 4.11
         
         return CD_alpha
     
+    def Cx(alpha):
+        return -self.CD(alpha)*np.cos(alpha) + self.CL(alpha)*np.sin(alpha)
+    
+    def Cx_q(alpha):
+        return -MAV.C_D_q*np.cos(alpha) + MAV.C_L_q*np.sin(alpha)
+    
+    def Cx_deltae(alpha):
+        return -MAV.C_D_delta_e*np.cos(alpha) + MAV.C_L_delta_e*np.sin(alpha)
+    
     def Cz(alpha):
-        return -Cd(alpha)*np.sin(alpha)-Cl(alpha)*np.cos(alpha)
+        return -self.CD(alpha)*np.sin(alpha)-self.CL(alpha)*np.cos(alpha)
     
     def Cz_q(alpha):
         return -MAV.C_D_q*np.sin(alpha)-MAV.C_L_q*np.cos(alpha)
@@ -245,7 +254,7 @@ class mavDynamics:
                 
         
         aero_coef = 0.5*MAV.rho*self._Va**2*MAV.S_wing
-        fx_aero = aero_coef * ()
+        fx_aero = aero_coef * (self.Cx(self._alpha) + self.Cx_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cx_deltae(self._alpha)*delta_e)
         fy_aero = aero_coef * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta + MAV.C_Y_p*b/(2*self._Va)*p + cyr * b/(2*self._Va)*r + cydeltaa * delta_a + cydeltar* delta_r)
         fz_aero = aero_coef * (self.Cz(self._alpha) + self.Cz_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cz_deltae(self._alpha)*delta_e)
         Mx_aero = aero_coef * MAV.c * (MAV.C_ell_0 + MAV.C_ell_beta*self._beta + MAV.C_ell_p*b/(2*self._Va)*p + MAV.C_ell_r*b/(2*self._Va)*r + MAV.C_ell_delta_a*delta_a + MAV.C_ell_delta_r*delta_r)
