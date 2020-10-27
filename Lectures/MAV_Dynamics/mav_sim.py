@@ -7,4 +7,6 @@ import mav_dynamics
 import mavsim_python_chap5_model_coef as chap5
 
 # Define sim parameters
+
+uav = mav_dynamics.mavDynamics(0.02)
 x0 = chap5.x_trim
