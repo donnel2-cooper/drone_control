@@ -151,8 +151,8 @@ class mavDynamics:
 
 
     def thrust_from_prop(delta_t):
-        # compute t h r u s t and torque due to p r o p ell e r ( See addendum by McLain)
-        # map d e l t a t t h r o t t l e command(0 t o 1) i n t o motor i n p u t v o l t a g e
+        # compute thrust and torque due to propeller (See addendum by McLain)
+        # map delta_t throttle command (0 to 1) into motor input voltage
         V_in = MAV.V_max * delta_t
         KQ = MAV.KQ
         
@@ -165,12 +165,12 @@ class mavDynamics:
         * self._Va**2  (KQ / MAV.R_motor ) * V_in + KQ * MAV.i0
         # Consider only positive root
         Omega_op = (b + np.sqrt(b**2 - 4*a* c)) / (2. * a )
-        # compute advance rat io
+        # compute advance ratio
         J_op = 2 * np.pi * self._Va / (Omega_op * MAV.D_prop)
-        # compute nond imens ional ized c o e f f i c i e n t s of thrus t and torque
+        # compute nondimensionalized coefficients of thrust and torque
         C_T = MAV.C_T2 * J_op **2 + MAV.C_T1 * J_op + MAV.C_T0
         C_Q = MAV.C_Q2 * J_op **2 + MAV.C_Q1 * J_op + MAV.C_Q0
-        # add thrus t and torque due to pr o peller
+        # add thrust and torque due to propeller
         n = Omega_op / (2 * np.pi )
         fx += MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
         Mx += MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
