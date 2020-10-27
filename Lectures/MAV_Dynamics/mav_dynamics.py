@@ -194,7 +194,7 @@ class mavDynamics:
     
     def CD(alpha):
         # returns drag coefficient using eq 4.11
-        
+        CD_alpha = MAV.C_D_p + (MAV.C_L_0 + MAV.C_L_alpha*alpha)**2/(np.pi*MAV.e*MAV.AR)
         return CD_alpha
     
     def Cx(alpha):
