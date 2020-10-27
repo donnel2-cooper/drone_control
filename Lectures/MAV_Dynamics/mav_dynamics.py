@@ -206,8 +206,6 @@ class mavDynamics:
     def Cz_deltae(alpha):
         return -MAV.C_D_delta_e*np.sin(alpha)-MAV.C_L_delta_e*np.cos(alpha)
     
-
-
     def _forces_moments(self, delta):
         """
         return the forces on the UAV based on the state, wind, and control surfaces
@@ -249,7 +247,7 @@ class mavDynamics:
         aero_coef = 0.5*MAV.rho*self._Va**2*MAV.S_wing
         fx_aero = aero_coef * ()
         fy_aero = aero_coef * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta + MAV.C_Y_p*b/(2*self._Va)*p + cyr * b/(2*self._Va)*r + cydeltaa * delta_a + cydeltar* delta_r)
-        fz_aero =  
+        fz_aero = aero_coef * (self.Cz(self._alpha) + self.Cz_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cz_deltae(self._alpha)*delta_e
         Mx_aero = 
         My_aero = 
         Mz_aero = 
