@@ -196,6 +196,16 @@ class mavDynamics:
         # returns drag coefficient using eq 4.11
         
         return CD_alpha
+    
+    def Cz(alpha):
+        return -Cd(alpha)*np.sin(alpha)-Cl(alpha)*np.cos(alpha)
+    
+    def Cz_q(alpha):
+        return -MAV.C_D_q*np.sin(alpha)-MAV.C_L_q*np.cos(alpha)
+    
+    def Cz_deltae(alpha):
+        return -MAV.C_D_delta_e*np.sin(alpha)-MAV.C_L_delta_e*np.cos(alpha)
+    
 
 
     def _forces_moments(self, delta):
