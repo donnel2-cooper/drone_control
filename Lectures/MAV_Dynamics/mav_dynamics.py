@@ -17,7 +17,7 @@ import numpy as np
 from message_types.msg_state import msgState
 
 import parameters.aerosonde_parameters as MAV
-from tools.rotations import Quaternion2Rotation, Quaternion2Euler
+from tools.rotations import Quaternion2Rotation, Quaternion2Euler, skew, quat_prod
 
 
 class mavDynamics:
@@ -117,7 +117,7 @@ class mavDynamics:
         
         # Normalize quat. -> rotation
         q_ib = q_ib/np.linalg.norm(q_ib) # normalize
-        R_ib = rot_from_quat(q_ib)
+        R_ib = Quaternion2Rotation(q_ib)
         
         # Compute equations of motion
         # d/dt(r_i) 
@@ -150,7 +150,7 @@ class mavDynamics:
         self._beta = np.arcsin(vr/self._Va)
 
 
-    def thrust_from_prop(delta_t):
+    def thrust_from_prop(self, delta_t):
         # compute thrust and torque due to propeller (See addendum by McLain)
         # map delta_t throttle command (0 to 1) into motor input voltage
         V_in = MAV.V_max * delta_t
@@ -172,8 +172,8 @@ class mavDynamics:
         C_Q = MAV.C_Q2 * J_op **2 + MAV.C_Q1 * J_op + MAV.C_Q0
         # add thrust and torque due to propeller
         n = Omega_op / (2 * np.pi )
-        fx += MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
-        Mx += MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
+        fx = MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
+        Mx = MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
         
         return fx,Mx
     
@@ -184,10 +184,10 @@ class mavDynamics:
         sigma_alpha = (1 + np.exp(a1)+np.exp(a2)) / ((1+np.exp(a1))*(1+np.exp(a2)))
         return sigma_alpha
     
-    def CL(alpha):
+    def CL(self,alpha):
         CL0 = MAV.C_L_0
         CLA = MAV.C_L_alpha
-        sigma_alpha = sigma(alpha)
+        sigma_alpha = self.sigma(alpha)
         # returns lift coefficient using eq 4.9
         CL_alpha = (1-sigma_alpha)*(CL0 + CLA*alpha) + sigma_alpha*(2*np.sign(alpha)*np.sin(alpha)**2 * np.cos(alpha))
         return CL_alpha
@@ -197,7 +197,7 @@ class mavDynamics:
         CD_alpha = MAV.C_D_p + (MAV.C_L_0 + MAV.C_L_alpha*alpha)**2/(np.pi*MAV.e*MAV.AR)
         return CD_alpha
     
-    def Cx(alpha):
+    def Cx(self,alpha):
         return -self.CD(alpha)*np.cos(alpha) + self.CL(alpha)*np.sin(alpha)
     
     def Cx_q(alpha):
@@ -206,7 +206,7 @@ class mavDynamics:
     def Cx_deltae(alpha):
         return -MAV.C_D_delta_e*np.cos(alpha) + MAV.C_L_delta_e*np.sin(alpha)
     
-    def Cz(alpha):
+    def Cz(self,alpha):
         return -self.CD(alpha)*np.sin(alpha)-self.CL(alpha)*np.cos(alpha)
     
     def Cz_q(alpha):
@@ -238,7 +238,7 @@ class mavDynamics:
         fz_grav = mg* np.cos(theta) * np.cos(phi)
                     
         # Thrust Components of Force and Moments
-        fx_thrust,Mx_thrust = thrust_from_prop(delta_t)
+        fx_thrust,Mx_thrust = self.thrust_from_prop(delta_t)
         fy_thrust = 0
         fz_thrust = 0
         My_thrust = 0
@@ -260,13 +260,14 @@ class mavDynamics:
         Mx_aero = aero_coef * MAV.c * (MAV.C_ell_0 + MAV.C_ell_beta*self._beta + MAV.C_ell_p*b/(2*self._Va)*p + MAV.C_ell_r*b/(2*self._Va)*r + MAV.C_ell_delta_a*delta_a + MAV.C_ell_delta_r*delta_r)
         My_aero = aero_coef * MAV.c * (MAV.C_m_0 + MAV.C_m_alpha*self._alpha + MAV.C_m_q*MAV.c/(2*self._Va)*q + MAV.C_m_delta_e*delta_e)
         Mz_aero = aero_coef * MAV.b * (MAV.C_n_0 + MAV.C_n_beta*self._beta + MAV.C_n_p*MAV.b/(2*self._Va)*p + MAV.C_n_r*MAV.b/(2*self._Va)*r + MAV.C_n_delta_a*delta_a + MAV.C_n_delta_r*delta_r)
-
-        fx = fx_grav + fx_aero +　fx_thrust
-        fy = fy_grav + fy_aero +　fy_thrust
-        fz =　fz_grav + fz_aero +　fz_thrust
-        Mx = Mx_aero +　Mx_thrust
-        My = My_aero +　My_thrust
-        Mz = Mz_aero +　Mz_thrust
+        
+        
+        fx = fx_grav + fx_aero + fx_thrust
+        fy = fy_grav + fy_aero + fy_thrust
+        fz = fz_grav + fz_aero + fz_thrust
+        Mx = Mx_aero + Mx_thrust
+        My = My_aero + My_thrust
+        Mz = Mz_aero + Mz_thrust
 
         self._forces[0] = fx
         self._forces[1] = fy
