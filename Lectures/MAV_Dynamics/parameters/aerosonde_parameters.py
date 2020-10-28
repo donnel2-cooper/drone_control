@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 import numpy as np
-from tools.rotations import Euler2Quaternion
+from tools.rotations import Euler2Quaternion, Quaternion2Euler
 
 ######################################################################################
                 #   Initial Conditions
@@ -44,6 +44,8 @@ e1 = e.item(1)
 e2 = e.item(2)
 e3 = e.item(3)
 
+phi0 , theta0, psi0 = Quaternion2Euler(e)
+
 
 ######################################################################################
                 #   Physical Parameters
@@ -52,7 +54,8 @@ mass = 11. #kg
 Jx = 0.8244 #kg m^2
 Jy = 1.135
 Jz = 1.759
-Jxz = 0.1204
+# Jxz = 0.1204
+Jxz = 0.0
 J = np.matrix([[Jx,0,-Jxz],[0,Jy,0],[-Jxz,0,Jz]])
 S_wing = 0.55
 b = 2.8956

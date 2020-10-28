@@ -171,7 +171,7 @@ class mavDynamics:
         # add thrust and torque due to propeller
         n = Omega_op / (2 * np.pi )
         fx = MAV.rho * n**2 * np.power(MAV.D_prop, 4) * C_T
-        Mx = MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
+        Mx = -MAV.rho * n**2 * np.power(MAV.D_prop, 5) * C_Q
         return fx,Mx
     
     def sigma(self,alpha):
@@ -215,7 +215,7 @@ class mavDynamics:
     def _forces_moments(self, delta):
         """
         return the forces on the UAV based on the state, wind, and control surfaces
-        :param delta: np.matrix(delta_a, delta_e, delta_r, delta_t)
+        :param delta: np.matrix(delta_e, delta_a, delta_r, delta_t)
         :return: Forces and Moments on the UAV np.matrix(Fx, Fy, Fz, Ml, Mn, Mm)
         """
         phi, theta, psi = Quaternion2Euler(self._state[6:10])
@@ -252,22 +252,24 @@ class mavDynamics:
         fx_aero = aero_coef * (self.Cx(self._alpha) + self.Cx_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cx_deltae(self._alpha)*delta_e)
         fy_aero = aero_coef * (MAV.C_Y_0 + MAV.C_Y_beta*self._beta + MAV.C_Y_p*b/(2*self._Va)*p + cyr * b/(2*self._Va)*r + cydeltaa * delta_a + cydeltar* delta_r)
         fz_aero = aero_coef * (self.Cz(self._alpha) + self.Cz_q(self._alpha)*MAV.c/(2*self._Va)*q + self.Cz_deltae(self._alpha)*delta_e)
-        Mx_aero = aero_coef * MAV.c * (MAV.C_ell_0 + MAV.C_ell_beta*self._beta + MAV.C_ell_p*b/(2*self._Va)*p + MAV.C_ell_r*b/(2*self._Va)*r + MAV.C_ell_delta_a*delta_a + MAV.C_ell_delta_r*delta_r)
+        Mx_aero = aero_coef * MAV.b * (MAV.C_ell_0 + MAV.C_ell_beta*self._beta + MAV.C_ell_p*b/(2*self._Va)*p + MAV.C_ell_r*b/(2*self._Va)*r + MAV.C_ell_delta_a*delta_a + MAV.C_ell_delta_r*delta_r)
         My_aero = aero_coef * MAV.c * (MAV.C_m_0 + MAV.C_m_alpha*self._alpha + MAV.C_m_q*MAV.c/(2*self._Va)*q + MAV.C_m_delta_e*delta_e)
         Mz_aero = aero_coef * MAV.b * (MAV.C_n_0 + MAV.C_n_beta*self._beta + MAV.C_n_p*MAV.b/(2*self._Va)*p + MAV.C_n_r*MAV.b/(2*self._Va)*r + MAV.C_n_delta_a*delta_a + MAV.C_n_delta_r*delta_r)
         
-        print('fx_aero = ',fx_aero)
-        print('fx_grav = ',fx_grav)
-        print('fx_thrust = ',fx_thrust)
         
         
         fx = fx_grav + fx_aero + fx_thrust
-        print('fx = ',fx)
         fy = fy_grav + fy_aero + fy_thrust
         fz = fz_grav + fz_aero + fz_thrust
+        # print('fx = ',fx)
+        # print('fy = ',fy)
+        # print('fz = ',fz)
         Mx = Mx_aero + Mx_thrust
         My = My_aero + My_thrust
         Mz = Mz_aero + Mz_thrust
+        # print('Mx = ',Mx)
+        # print('My = ',My)
+        # print('Mz = ',Mz)
 
         self._forces[0] = fx
         self._forces[1] = fy
