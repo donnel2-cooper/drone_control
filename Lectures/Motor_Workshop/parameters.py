@@ -9,7 +9,7 @@ Ts = 5e-3 # s
 nsteps = 1000
 
 # PID controller
-kp = 0 
-ki = 0
-kd = 0
+kp = 2
+ki = 10
+kd = 0.1
 sigma = 0.1
