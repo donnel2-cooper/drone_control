@@ -64,24 +64,28 @@ t = 0
 for i in range(P.nsteps):
     
     upi = PIcontroller.update(r,theta)
-    for j in range(1,10):
-        ud = Dcontroller.update(r, omega)
-        omega = system.update_omega(t,omega,ud)
+    #for j in range(1,10):
+    for j in range(1,12):
+        ud = Dcontroller.update(upi, omega)
+        omega = system.update_omega(t,omega,upi-ud)
         # ud = P.kd * omega
         # ud = 1
     t += P.Ts
-    theta = system.update_theta(t,theta,upi+ud)
+    theta = system.update_theta(t,theta,omega)
     t_history.append(t)
     omega_history.append(omega)
     theta_history.append(theta)
     upi_history.append(upi)
     ud_history.append(ud)
+    
+
 
 
 # Plot response theta due to step change in r
 plt.figure(figsize=(8,6))
 plt.plot(t_history,omega_history, label="$\omega$")
 plt.plot(t_history,theta_history, label="$\Theta$")
+plt.ylim([0,25])
 plt.legend()
 plt.show()
 
