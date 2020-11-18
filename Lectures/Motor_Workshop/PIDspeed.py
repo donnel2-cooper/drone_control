@@ -78,7 +78,7 @@ print(f'Final speed = {omega_history[-1]}')
 
 # Plot actuation signal
 plt.figure(figsize=(8,6))
-plt.plot(t_history,u_history, label="Actuation$")
+plt.plot(t_history,u_history, label="Actuation")
 plt.legend()
 plt.xlabel("Time [s]")
 plt.ylabel("Actuation [V]")
