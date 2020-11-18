@@ -4,6 +4,7 @@ from integrators import get_integrator
 # import integrators as intg
 from pid import PIDControl
 import matplotlib.pyplot as plt
+import os
 
 class Controller:
     
@@ -31,8 +32,8 @@ class System:
         self.intg_omega = get_integrator(Ts,self.omega_dot)
         
     def omega_dot(self, t,omega,u):
-        self.omega_dot = (self.K/self.tau)*u - omega/self.tau #Psuedo code EOM
-        return self.omega_dot 
+        self.alpha = (self.K/self.tau)*u - omega/self.tau #Psuedo code EOM
+        return self.alpha 
 
     def update_omega(self,t,omega,u):
         return self.intg_omega.step(t,omega,u)
@@ -46,7 +47,7 @@ t_history = [0]
 omega_history = [0]
 u_history = [0]
 
-r = 10
+r = 1
 omega = 0
 t = 0 
 
@@ -61,21 +62,45 @@ for i in range(P.nsteps):
     u_history.append(u)
 
 # Plot response theta due to step change in r
+"""
 plt.figure(figsize=(8,6))
 plt.plot(t_history,omega_history, label="$\omega$")
+plt.plot(t_history,np.ones(len(t_history)), label="Setpoint", linestyle = "dashed")
 plt.xlabel("Time [s]")
 plt.ylabel("Speed [rad/s]")
 # plt.ylim([0,12])
-plt.legend()
+plt.title(f"Speed Control with kp={P.kp} ki={P.ki} kd={P.kd}")
+plt.legend(loc=1)
 plt.show()
 print(f'Final speed = {omega_history[-1]}')
+"""
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16,6))
+ax1.plot(t_history,omega_history, label="$\omega$") 
+ax1.plot(t_history,np.ones(len(t_history)), label="Setpoint", linestyle = "dashed")
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("Speed [rad/s]")
+ax1.set_title(f"Speed Control with kp={P.kp} ki={P.ki} kd={P.kd}")
+ax1.legend(loc=4)
 
 
+ax2.plot(t_history,u_history, label="Actuation")
+ax2.set_xlabel("Time [s]")
+ax2.set_ylabel("Actuation [V]")
+ax2.set_title("Input Voltage")
+ax2.legend(loc=4)
+
+plt.savefig('Lectures/Motor_Workshop/Speed_Control_Figs/'+f"speed_kp_{P.kp}_ki_{P.ki}_kd_{P.kd}.png")
+plt.show()
+
+
+'''
 # Plot actuation signal
 plt.figure(figsize=(8,6))
 plt.plot(t_history,u_history, label="Actuation")
-plt.legend()
 # plt.ylim([0,12])
 plt.xlabel("Time [s]")
 plt.ylabel("Actuation [V]")
+plt.legend(loc=1)
 plt.show()
+'''

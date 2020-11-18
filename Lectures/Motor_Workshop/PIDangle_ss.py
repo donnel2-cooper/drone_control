@@ -47,7 +47,7 @@ for i in range(P.nsteps):
     x_history.append(x)
     u_history.append(u)
 
-
+'''
 # Plot response theta due to step change in r
 plt.figure(figsize=(8,6))
 plt.plot(t_history,x_history, label="$\omega$")
@@ -58,13 +58,37 @@ plt.show()
 
 # print(f'Final speed = {omega_history[-1]}')
 
-
 # Plot actuation signal
 plt.figure(figsize=(8,6))
 plt.plot(t_history,u_history, label="Actuation")
 plt.legend()
 plt.xlabel("Time [s]")
 plt.ylabel("Actuation [V]")
+plt.show()
+'''
+x_history = np.array(x_history)
+
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24,6))
+ax1.plot(t_history,x_history[:,0], label="θ") 
+ax1.plot(t_history,np.ones(len(t_history)), label="Setpoint", linestyle = "dashed")
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("Position [rad]")
+ax1.set_title(f"Position Control with kp={P.kp} ki={P.ki} kd={P.kd}")
+ax1.legend(loc=4)
+
+ax2.plot(t_history,x_history[:,1], label="$\omega$") 
+ax2.set_xlabel("Time [s]")
+ax2.set_ylabel("Speed [rad/s]")
+ax2.set_title(f"Speed with kp={P.kp} ki={P.ki} kd={P.kd}")
+ax2.legend(loc=4)
+
+ax3.plot(t_history,u_history, label="Actuation")
+ax3.set_xlabel("Time [s]")
+ax3.set_ylabel("Actuation [V]")
+ax3.set_title("Input Voltage")
+ax3.legend(loc=4)
+
+plt.savefig('Lectures/Motor_Workshop/Position_Control_Figs/'+f"speed_kp_{P.kp}_ki_{P.ki}_kd_{P.kd}.png")
 plt.show()
 
 
