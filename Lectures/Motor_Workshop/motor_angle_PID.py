@@ -21,7 +21,6 @@ class Controller:
         PID_object = PIDControl(self.kp, self.ki, self.kd, self.limit, self.sigma, self.Ts, self.flag)        
         return PID_object.PID(r,y)
 
-
 class System:
     def __init__(self, K, tau, omega, Ts):
         self.K = K # Motor gain
@@ -40,6 +39,9 @@ class System:
 
     def update_omega(self,t,y,u):
         return self.intg_omega.step(t,y,u)
+    
+    def update_theta(self,t,y,u):
+        return self.intg_theta.step(t,y,u)
         
     
 # Init system and feedback controller
@@ -48,32 +50,36 @@ controller = Controller(P.kp,P.ki,P.kd,P.umax,P.sigma,P.Ts,flag=True)
 # Simulate step response
 t_history = [0]
 omega_history = [0]
+theta_history = [0]
 u_history = [0]
 
-r = 20
+r = 13
 theta = 0
 omega = 0.1
 t = 0
 
 for i in range(P.nsteps):
     
-    u = controller.update(r,omega)
+    u = controller.update(r,theta)
+    
     t += P.Ts
     omega = system.update_omega(t,omega,u)
+    theta = system.update_theta(t,theta,omega)
     t_history.append(t)
     omega_history.append(omega)
+    theta_history.append(theta)
     u_history.append(u)
 
 
 # Plot response theta due to step change in r
 plt.figure(figsize=(8,6))
 plt.plot(t_history,omega_history, label="$\omega$")
+plt.plot(t_history,theta_history, label="$\Theta$")
 plt.xlabel("Time [s]")
-plt.ylabel("Speed [rad/s]")
 plt.legend()
 plt.show()
 
-print(f'Final speed = {omega_history[-1]}')
+print(f'Final angle = {theta_history[-1]}')
 
 
 # Plot actuation signal

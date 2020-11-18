@@ -11,5 +11,5 @@ nsteps = 1000
 # PID controller
 kp = 2
 ki = 10
-kd = 0.1
+kd = 0
 sigma = 0.1
