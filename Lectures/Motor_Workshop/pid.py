@@ -76,17 +76,8 @@ class PIDControl:
         self.error_d1 = error 
         self.y_d1 = y
         return u_sat
+    
     def saturate(self,u):
         if abs(u) > self.limit:
             u = self.limit*np.sign(u)
         return u
-    
-    """
-    def saturate(self,u):
-        for i in range(u.shape[0]):
-            if abs(u[i] > self.limit):
-                u[i] = self.limit*np.sign(u[i])
-        return u
-    """
-    
-    
