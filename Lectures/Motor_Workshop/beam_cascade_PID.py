@@ -55,7 +55,7 @@ theta_history = [0]
 upi_history = [0]
 ud_history = [0]
 
-r = 0.78 # 0.78 rad = 45 deg
+r = 1 # 0.78 rad = 45 deg
 theta = 0
 omega = 0
 t = 0
@@ -74,6 +74,35 @@ for i in range(P.nsteps):
     upi_history.append(upi)
     ud_history.append(ud)
 
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24,6))
+ax1.plot(t_history,theta_history, label="θ") 
+ax1.plot(t_history,np.ones(len(t_history)), label="Setpoint", linestyle = "dashed")
+ax1.set_xlabel("Time [s]")
+ax1.set_ylabel("Position [rad]")
+ax1.set_title(f"Position Control with kp={P.kp} ki={P.ki} kd={P.kd}")
+ax1.legend(loc=4)
+
+ax2.plot(t_history,omega_history, label="$\omega$") 
+ax2.set_xlabel("Time [s]")
+ax2.set_ylabel("Speed [rad/s]")
+ax2.set_title(f"Speed with kp={P.kp} ki={P.ki} kd={P.kd}")
+ax2.legend(loc=4)
+
+ax3.plot(t_history,np.add(upi_history, ud_history), label="Total Actuation")
+ax3.plot(t_history,upi_history, label="PI Input")
+ax3.plot(t_history,ud_history, label="D Input")
+
+ax3.set_xlabel("Time [s]")
+ax3.set_ylabel("Thurst [kg]")
+ax3.set_title("Input Thrust")
+ax3.legend(loc=4)
+
+plt.savefig('Lectures/Motor_Workshop/Beam_Position_Control_Figs/'+f"cascade_kp_{P.kp}_ki_{P.ki}_kd_{P.kd}.png")
+plt.show()
+
+
+
+'''
 # Plot response theta due to step change in r
 plt.figure(figsize=(8,6))
 plt.plot(t_history,omega_history, label="$\omega$")
@@ -90,3 +119,4 @@ plt.legend()
 plt.xlabel("Time [s]")
 plt.ylabel("Actuation [V]")
 plt.show()
+'''
