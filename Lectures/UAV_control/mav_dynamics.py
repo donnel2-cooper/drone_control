@@ -65,7 +65,7 @@ class mavDynamics:
     def update(self, delta, wind):
         """
             Integrate the differential equations defining dynamics, update sensors
-            delta = (delta_a, delta_e, delta_r, delta_t) are the control inputs
+            delta = (delta_e, delta_a, delta_r, delta_t) are the control inputs
             wind is the wind vector in inertial coordinates
             Ts is the time step between function calls.
         """
@@ -78,7 +78,7 @@ class mavDynamics:
         k2 = self._derivatives(self._state + time_step/2.*k1, forces_moments)
         k3 = self._derivatives(self._state + time_step/2.*k2, forces_moments)
         k4 = self._derivatives(self._state + time_step*k3, forces_moments)
-        self._state += time_step/6 * (k1 + 2*k2 + 2*k3 + k4)
+        self._state = self._state + time_step/6 * (k1 + 2*k2 + 2*k3 + k4)
 
         # normalize the quaternion
         e0 = self._state.item(6)
