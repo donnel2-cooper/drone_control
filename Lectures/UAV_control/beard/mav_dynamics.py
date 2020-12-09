@@ -298,5 +298,4 @@ class mavDynamics:
         self.true_state.q = self._state.item(11)
         self.true_state.r = self._state.item(12)
         self.true_state.wn = self._wind.item(0)
-        self.true_state.we = self._wind.item(1)
-        
+        self.true_state.we = self._wind.item(1)    
