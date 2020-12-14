@@ -20,7 +20,7 @@ class autopilot:
         self.roll_from_aileron = pdControlWithRate(
                         kp=AP.roll_kp,
                         kd=AP.roll_kd,
-                        limit=np.radians(45))
+                        limit=AP.max_ail)
         self.course_from_roll = piControl(
                         kp=AP.course_kp,
                         ki=AP.course_ki,

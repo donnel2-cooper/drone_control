@@ -141,3 +141,10 @@ C_r_p = gamma4 * C_ell_p + gamma8 * C_n_p
 C_r_r = gamma4 * C_ell_r + gamma8 * C_n_r
 C_r_delta_a = gamma4 * C_ell_delta_a + gamma8 * C_n_delta_a
 C_r_delta_r = gamma4 * C_ell_delta_r + gamma8 * C_n_delta_r
+
+######################################################################################
+                #   Linear Model Params
+######################################################################################
+a_phi_1 = -0.5*rho*Va0**2*S_wing*b*C_p_p*b/(2*Va0)
+a_phi_2 = 0.5*rho*(Va0**2)*S_wing*b*C_p_delta_a
+
