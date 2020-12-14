@@ -15,7 +15,7 @@ class Controller:
         self.ki = ki # Integral control gain
         self.kd = kd # Derivative control gain
         self.limit = limit # The output saturates at this limit
-        self.sigma = sigma # dirty derivative bandwidth is 1/sigma 
+        self.sigma = sigma # dirty derivative bandwidth is 1/sigma
         self.beta = (2.0*sigma-Ts)/(2.0*sigma+Ts)
         self.Ts = Ts # sample rate 
         self.flag = flag
@@ -89,7 +89,7 @@ for ii in range(n):
     drud_cmd = -(r_ref-r_fb)
     
     #Calculate Airspeed Control
-    dthrot_cmd = airspeed_controller.update(airspeed_ref,uav.true_state.Va)+chap5.u_trim[3]
+    dthrot_cmd = airspeed_controller.update(airspeed_ref,uav.true_state.Va)+chap5.u_trim[3] #This is jank
     
     #Make delta
     delta = np.array([delev_cmd, dail_cmd, drud_cmd, dthrot_cmd])
@@ -301,23 +301,4 @@ plt.show()
 
 # if VIDEO is True:
 #     video.close()
-
-
-
-#
-# e_course = course_cmd-course_fb
-# bank_cmd = PID(e_course,kp,ki)
-# e_bank = bank_cmd-bank_fb
-# p_cmd = PID(e_bank,kp)
-# dail_cmd = p_cmd-p_fb*kd
-# p_new = G*dail_cmd
-# bank_new = p_new*1/s
-# course_new = g/Vg/s^bank_new
-# course_fb = course_new
-# bank_fb = bank_new
-# p_fb = p_new
-# ...
-
-
-
 
