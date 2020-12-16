@@ -13,6 +13,7 @@ zeta_phi = 0.707
 a_phi_2 = 130.6
 a_phi_1 = 22.6
 
+
 roll_kp = wn_phi**2./a_phi_2
 roll_kd = (2.*zeta_phi*wn_phi-a_phi_1)/a_phi_2
 
@@ -27,13 +28,10 @@ course_ki = wn_chi**2.*Va0/gravity
 sideslip_ki = 0 # Fix this later
 sideslip_kp = 1 #Fix this later, too
 
-# #----------yaw damper-------------
-# yaw_damper_tau_r =
-# yaw_damper_kp =
 
 #----------pitch loop-------------
 wn_theta = 15
-zeta_theta = 0.8
+zeta_theta = 0.707
 
 a_theta_1 = 5.29
 a_theta_2 = 99.7

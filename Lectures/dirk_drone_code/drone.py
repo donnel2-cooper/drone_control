@@ -6,6 +6,8 @@ from thrust import Thrust
 from wind import Wind
 from integrators import get_integrator
 from simulation_parameters import ts_simulation
+from rotations import quat2rot
+import numpy as np
 
 class Drone():
     def __init__(self):
@@ -41,5 +43,11 @@ class Drone():
         x = self.intg.step(self.state.time, self.state.rigid_body, delta)
         self.state.time += self.state.timestep
         self.state.rigid_body = x 
+
+        # update the class structure for the true state:
+        #   [pn, pe, h, Va, alpha, beta, phi, theta, chi, p, q, r, Vg, wn, we, psi, gyro_bx, gyro_by, gyro_bz]
+        pdot = quat2rot(x[6:10]) @ x[3:6]
+        self.state.chi = np.arctan2(pdot.item(1), pdot.item(0))
+
         
         

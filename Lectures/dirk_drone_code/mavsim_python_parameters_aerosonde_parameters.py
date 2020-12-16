@@ -140,3 +140,6 @@ C_r_p = gamma4 * C_ell_p + gamma8 * C_n_p
 C_r_r = gamma4 * C_ell_r + gamma8 * C_n_r
 C_r_delta_a = gamma4 * C_ell_delta_a + gamma8 * C_n_delta_a
 C_r_delta_r = gamma4 * C_ell_delta_r + gamma8 * C_n_delta_r
+
+a_theta_1 = -(rho*Va0**2*c*S_wing/(2*Jy)*C_m_q*c/(2*Va0))
+a_theta_2 = -rho*Va0**2*c*S_wing/(2*Jy)*C_m_alpha

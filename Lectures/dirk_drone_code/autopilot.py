@@ -14,7 +14,7 @@ class autopilot:
         self.yaw_damper = matlab.tf([0.5, 0.],[1.0, ],ts_control)
 
         # instantiate lateral controllers
-        self.pitch_from_elevator = pid.PIDControl(kp=AP.pitch_kp,kd=AP.pitch_kd,limit=np.radians(45))
+        self.pitch_from_elevator = pid.PIDControl(kp=AP.pitch_kp,kd=0,limit=np.radians(45))
         self.altitude_from_pitch = pid.PIDControl(kp=AP.altitude_kp,ki=AP.altitude_ki,Ts=ts_control,limit=np.radians(30))
         self.airspeed_from_throttle = pid.PIDControl(kp=AP.airspeed_throttle_kp,ki=AP.airspeed_throttle_ki,Ts=ts_control,limit=1.5,flag=True)
 
