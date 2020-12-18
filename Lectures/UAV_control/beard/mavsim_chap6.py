@@ -164,11 +164,6 @@ plt.legend()
 plt.show()
 
 
-
-
-
-
-
 # # Vel vs Time
 # plt.figure()
 # plt.plot(t_history,state[3,:],'r',label = 'u') 

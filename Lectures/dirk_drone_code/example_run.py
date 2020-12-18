@@ -5,6 +5,7 @@ from rotations import *
 import mavsim_python_parameters_aerosonde_parameters as P
 import simulation_parameters as SIM
 import autopilot
+import signals as sigs
 
 
 plt.close('all')
@@ -33,24 +34,31 @@ drone.state.rigid_body = x_trim
 delta = delta_trim
 
 # Drone Sim
-t_history = [0]
-x_history = [drone.state.rigid_body]
-delta_history = [delta]
-chi_history = [drone.state.chi]
+t_history = []
+x_history = []
+delta_history = []
+chi_history = []
 
 Va_command = 25
 h_command = 100
 chi_command = np.radians(0)
 
 
-while drone.state.time <= 200: #SIM.end_time:
-    if drone.state.time>100:
-        chi_command = np.radians(5)
+while drone.state.time <= 50: #SIM.end_time:
+    # if drone.state.time>100:
+    #     chi_command = np.radians(5)
     drone.update(delta)
     command = np.array([chi_command,h_command,Va_command])
     delta = ctrl.update(command,drone.state)
     delta[3] = float(delta[3]) + float(delta_trim[3])
-    t_history.append(drone.state.time)
+    
+
+while drone.state.time <= 250:
+    drone.update(delta)
+    command = np.array([chi_command,h_command,Va_command])
+    delta = ctrl.update(command,drone.state)
+    delta[3] = float(delta[3]) + float(delta_trim[3])
+    t_history.append(drone.state.time-50)
     x_history.append(drone.state.rigid_body)
     delta_history.append(delta)
     chi_history.append(drone.state.chi)
@@ -63,11 +71,22 @@ plt.plot(t_history, x_history[:, :3])
 plt.legend(['x1', 'x2', 'x3'])
 plt.show()
 
+plt.figure()
+plt.plot(t_history, -x_history[:,2])
+plt.legend(['h [m]'])
+plt.ylim((95,105))
+plt.show()
+
 
 plt.figure()
 plt.plot(t_history, x_history[:, 3:6])
 plt.legend(['u', 'v', 'w'])
 plt.show()
+
+delev = []
+dail = []
+drud = []
+dthrot = []
 
 # Convert quat to euler
 nsteps = x_history.shape[0]
@@ -75,15 +94,27 @@ euler_angles = np.zeros((nsteps, 3))
 for i in range(nsteps):         
     e = x_history[i, 6:10]
     euler_angles[i, :] = quat2euler(e) # phi, theta, psi = 
+    delev.append(float(delta_history[i][0]))
+    dail.append(float(delta_history[i][1]))
+    drud.append(float(delta_history[i][2]))
+    dthrot.append(float(delta_history[i][3]))
 
 plt.figure()
 plt.plot(t_history, (180/np.pi)*euler_angles)
-plt.legend(['phi', 'theta', 'psi'])
+plt.legend(['phi [deg]', 'theta [deg]', 'psi [deg]'])
 plt.show()
 
 plt.figure()
-plt.plot(t_history, x_history[:, 10:])
+plt.plot(t_history, np.degrees(x_history[:, 10:]))
 plt.legend(['p', 'q', 'r'])
+plt.show()
+
+plt.figure()
+plt.plot(t_history, delev)
+plt.plot(t_history, dail)
+plt.plot(t_history, drud)
+plt.plot(t_history, dthrot)
+plt.legend(['Elev [deg]','Ail [deg]','Rud [deg]','Throt [deg]'])
 plt.show()
 
 plt.figure()

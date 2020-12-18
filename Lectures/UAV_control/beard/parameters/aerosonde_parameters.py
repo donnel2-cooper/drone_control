@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 import numpy as np
-from tools.rotations import Euler2Quaternion
+from tools.tools import Euler2Quaternion
 
 ######################################################################################
                 #   Initial Conditions
@@ -31,12 +31,11 @@ e3 = e.item(3)
 ######################################################################################
                 #   Physical Parameters
 ######################################################################################
-mass = 11. #kg
+mass = 11 #kg
 Jx = 0.8244 #kg m^2
 Jy = 1.135
 Jz = 1.759
 Jxz = 0.1204
-J = np.matrix([[0.8244,0,-0.1204],[0,1.135,0],[-0.1204,0,1.759]]) #kg*m^2
 S_wing = 0.55
 b = 2.8956
 c = 0.18994
@@ -92,12 +91,18 @@ C_n_delta_r = -0.069
 ######################################################################################
                 #   Propeller thrust / torque parameters (see addendum by McLain)
 ######################################################################################
+C_prop = 1.0
+S_prop = 0.2027
+k_motor = 80
+kTp = 0.
+kOmega = 0.
+
 # Prop parameters
-D_prop = 20 * (0.0254)     # prop diameter in m
+D_prop = 20*(0.0254)     # prop diameter in m
 
 # Motor parameters
-KV = 145.                   # from datasheet RPM/V
-KQ = (1. / KV) * 60. / (2. * np.pi)  # KQ in N-m/A, V-s/rad
+K_V = 145.                   # from datasheet RPM/V
+KQ = (1. / K_V) * 60. / (2. * np.pi)  # KQ in N-m/A, V-s/rad
 R_motor = 0.042              # ohms
 i0 = 1.5                     # no-load (zero-torque) current (A)
 
@@ -106,7 +111,7 @@ i0 = 1.5                     # no-load (zero-torque) current (A)
 ncells = 12.
 V_max = 3.7 * ncells  # max voltage for specified number of battery cells
 
-# Coefficients from prop_data fit
+# Coeffiecients from prop_data fit
 C_Q2 = -0.01664
 C_Q1 = 0.004970
 C_Q0 = 0.005230
@@ -129,22 +134,15 @@ gamma7 = ((Jx - Jy) * Jx + (Jxz**2)) / gamma
 gamma8 = Jx / gamma
 
 #   C values defines on pag 62
-C_p_0 = gamma3 * C_ell_0 + gamma4 * C_n_0
-C_p_beta = gamma3 * C_ell_beta + gamma4 * C_n_beta
-C_p_p = gamma3 * C_ell_p + gamma4 * C_n_p
-C_p_r = gamma3 * C_ell_r + gamma4 * C_n_r
-C_p_delta_a = gamma3 * C_ell_delta_a + gamma4 * C_n_delta_a
-C_p_delta_r = gamma3 * C_ell_delta_r + gamma4 * C_n_delta_r
-C_r_0 = gamma4 * C_ell_0 + gamma8 * C_n_0
-C_r_beta = gamma4 * C_ell_beta + gamma8 * C_n_beta
-C_r_p = gamma4 * C_ell_p + gamma8 * C_n_p
-C_r_r = gamma4 * C_ell_r + gamma8 * C_n_r
-C_r_delta_a = gamma4 * C_ell_delta_a + gamma8 * C_n_delta_a
-C_r_delta_r = gamma4 * C_ell_delta_r + gamma8 * C_n_delta_r
-
-######################################################################################
-                #   Linear Model Params
-######################################################################################
-a_phi_1 = -0.5*rho*Va0**2*S_wing*b*C_p_p*b/(2*Va0)
-a_phi_2 = 0.5*rho*(Va0**2)*S_wing*b*C_p_delta_a
-
+C_p_0         = gamma3 * C_ell_0      + gamma4 * C_n_0
+C_p_beta      = gamma3 * C_ell_beta   + gamma4 * C_n_beta
+C_p_p         = gamma3 * C_ell_p      + gamma4 * C_n_p
+C_p_r         = gamma3 * C_ell_r      + gamma4 * C_n_r
+C_p_delta_a    = gamma3 * C_ell_delta_a + gamma4 * C_n_delta_a
+C_p_delta_r    = gamma3 * C_ell_delta_r + gamma4 * C_n_delta_r
+C_r_0         = gamma4 * C_ell_0      + gamma8 * C_n_0
+C_r_beta      = gamma4 * C_ell_beta   + gamma8 * C_n_beta
+C_r_p         = gamma4 * C_ell_p      + gamma8 * C_n_p
+C_r_r         = gamma4 * C_ell_r      + gamma8 * C_n_r
+C_r_delta_a    = gamma4 * C_ell_delta_a + gamma8 * C_n_delta_a
+C_r_delta_r    = gamma4 * C_ell_delta_r + gamma8 * C_n_delta_r

@@ -8,10 +8,9 @@ from control import matlab
 class autopilot:
     def __init__(self, ts_control):
         # instantiate lateral controllers
-        self.roll_from_aileron = pid.PIDControl(kp=AP.roll_kp,kd=AP.roll_kd,Ts=ts_control,limit=np.radians(45))
+        self.roll_from_aileron = pid.PIDControl(kp=AP.roll_kp,kd=0,Ts=ts_control,limit=np.radians(45))
         self.course_from_roll = pid.PIDControl(kp=AP.course_kp,ki=AP.course_ki,Ts=ts_control,limit=np.radians(30))
-        self.sideslip_from_rudder = pid.PIDControl(kp=AP.sideslip_kp,ki=AP.sideslip_ki,Ts=ts_control,limit=np.radians(45))
-        self.yaw_damper = matlab.tf([0.5, 0.],[1.0, ],ts_control)
+        self.yaw_damper = pid.PIDControl(kp=AP.sideslip_kp,ki=AP.sideslip_ki,Ts=ts_control,limit=np.radians(45))
 
         # instantiate lateral controllers
         self.pitch_from_elevator = pid.PIDControl(kp=AP.pitch_kp,kd=0,limit=np.radians(45))
@@ -22,8 +21,9 @@ class autopilot:
 
         # lateral autopilot
         phi_c = self.course_from_roll.PID(cmd[0],state.chi)
-        delta_a = self.roll_from_aileron.PID(phi_c, state.phi)
-        delta_r = self.sideslip_from_rudder.PID(0,state.beta)
+        delta_a_prime = self.roll_from_aileron.PID(phi_c, state.phi)
+        delta_a = delta_a_prime-AP.roll_kd*state.p
+        delta_r = self.yaw_damper.PID(0,state.beta)
 
         # longitudinal autopilot
         h_c = cmd[1]

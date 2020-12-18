@@ -6,23 +6,10 @@ from tools.rotations import Quaternion2Rotation, Quaternion2Euler, Euler2Quatern
 import mav_dynamics
 import mavsim_python_chap5_model_coef as chap5
 import matplotlib.pyplot as plt
-from pid import PIDControl 
+import pid
 import tools.transfer_function as tf
-
-class Controller:
-    def __init__(self, kp, ki, kd, limit, sigma, Ts, flag=True):
-        self.kp = kp # Proportional control gain
-        self.ki = ki # Integral control gain
-        self.kd = kd # Derivative control gain
-        self.limit = limit # The output saturates at this limit
-        self.sigma = sigma # dirty derivative bandwidth is 1/sigma
-        self.beta = (2.0*sigma-Ts)/(2.0*sigma+Ts)
-        self.Ts = Ts # sample rate 
-        self.flag = flag
-
-    def update(self, r, y):
-        PID_object = PIDControl(self.kp, self.ki, self.kd, self.limit, self.sigma, self.Ts, self.flag)        
-        return PID_object.PID(r,y)
+import autopilot
+import simulation_parameters as SIM
 
 # Define sim parameters
 dt = 0.001
@@ -46,57 +33,22 @@ chi = [uav.true_state.chi*180/np.pi]
 t_history = [T0]
 r_fb_array = [uav.true_state.r]
 
-dail_cmd_array = [delta[1]]
-drud_cmd_array = [delta[2]]
-
-kd_q = 1;
-kd_p = 1;
-T_r = 1;
-kr = 5;
-
-#lat-dir controllers
-course_controller = Controller(0.4,0.3,0,50,0.1,dt,True)
-bank_controller = Controller(1.4,0,0,50,0.1,dt,False)
-num = np.array([[T_r,0]])
-den = np.array([[T_r,1]])
-yaw_damper = tf.transfer_function(num,den,dt)
-
-#lon/throttle controllers
-h_controller = Controller(1,1,0,20,0.1,dt,True)
-theta_controller = Controller(5,0,0,10,0.1,dt,False)
-airspeed_controller = Controller(1,1,0,1,0.1,dt,True)
-
-
 course_ref = uav.true_state.chi
 r_ref = 0
 airspeed_ref = uav.true_state.Va
 h_ref = uav.true_state.h
 
+#Init Autopilot
+ctrl = autopilot.autopilot(SIM.ts_simulation)
+
 
 for ii in range(n):
-    #Calculate Pitch Control
-    theta_cmd = h_controller.update(h_ref,uav.true_state.h)
-    q_cmd = theta_controller.update(theta_cmd,uav.true_state.theta)
-    delev_cmd = q_cmd-uav.true_state.q*kd_q
-    
-    #Calculate Roll Control
-    bank_cmd = course_controller.update(course_ref,uav.true_state.chi)
-    p_cmd = bank_controller.update(bank_cmd,uav.true_state.phi)
-    dail_cmd = p_cmd-uav.true_state.p*kd_p
-    
-    #Calculate Yaw Control
-    r_fb = yaw_damper.update(uav.true_state.r)*kr
-    drud_cmd = -(r_ref-r_fb)
-    
-    #Calculate Airspeed Control
-    dthrot_cmd = airspeed_controller.update(airspeed_ref,uav.true_state.Va)+chap5.u_trim[3] #This is jank
-    
-    #Make delta
-    delta = np.array([delev_cmd, dail_cmd, drud_cmd, dthrot_cmd])
+    command = np.array([course_ref,h_ref,airspeed_ref])
     
     #Update State
     wind = np.array([[0.], [0.], [0.], [0.], [0.], [0.]])
     uav.update(delta,wind)
+    delta = ctrl.update(command,uav.true_state)
     uav._update_true_state()
     alpha.append(uav._alpha*180/np.pi)
     beta.append(uav._beta*180/np.pi)
@@ -107,9 +59,6 @@ for ii in range(n):
     psi.append(psi_t*180/np.pi)
     gamma.append(uav.true_state.gamma*180/np.pi)
     chi.append(uav.true_state.chi*180/np.pi)
-    dail_cmd_array.append(dail_cmd)
-    drud_cmd_array.append(drud_cmd)
-    r_fb_array.append(r_fb)
     state = np.concatenate((state,uav._state),axis = 1)
 
 # close all figures
@@ -179,23 +128,6 @@ plt.ylabel('Chi [deg]')
 plt.legend()
 plt.show()
 
-# u vs Time
-plt.figure()
-plt.plot(t_history,dail_cmd_array,'',label = 'u_ail') 
-plt.plot(t_history,drud_cmd_array,'',label = 'u_rud') 
-plt.xlabel('t [s]')
-plt.ylabel('u [deg]')
-plt.legend()
-plt.show()
-
-# r and r_fb
-plt.figure()
-plt.plot(t_history,state[12,:],'',label = 'r') 
-plt.plot(t_history,r_fb_array,'',label = 'r_fb') 
-plt.xlabel('t [s]')
-plt.ylabel('r [deg/s]')
-plt.legend()
-plt.show()
 
 
 

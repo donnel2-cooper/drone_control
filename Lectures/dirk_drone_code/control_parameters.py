@@ -25,8 +25,8 @@ course_kp = 2.*zeta_chi*wn_chi*Va0/gravity
 course_ki = wn_chi**2.*Va0/gravity
 
 #----------sideslip loop-------------
-sideslip_ki = 0 # Fix this later
-sideslip_kp = 1 #Fix this later, too
+sideslip_ki = 0
+sideslip_kp = 1
 
 
 #----------pitch loop-------------

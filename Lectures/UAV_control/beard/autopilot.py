@@ -13,6 +13,7 @@ from tools.transfer_function import transfer_function
 from tools.wrap import wrap
 from pid_control import pidControl, piControl, pdControlWithRate
 from message_types.msg_state import msgState
+from control import matlab
 
 class autopilot:
     def __init__(self, ts_control):
@@ -20,16 +21,17 @@ class autopilot:
         self.roll_from_aileron = pdControlWithRate(
                         kp=AP.roll_kp,
                         kd=AP.roll_kd,
-                        limit=AP.max_ail)
+                        limit=np.radians(45))
         self.course_from_roll = piControl(
                         kp=AP.course_kp,
                         ki=AP.course_ki,
                         Ts=ts_control,
                         limit=np.radians(30))
-        self.yaw_damper = transfer_function(
-                        num=np.array([[AP.yaw_damper_kp, 0]]),
-                        den=np.array([[1, 1/AP.yaw_damper_tau_r]]),
-                        Ts=ts_control)
+        self.yaw_damper = matlab.tf([0.5, 0.],[1.0, ],ts_control)
+                        #
+                        # num=np.array([[AP.yaw_damper_kp, 0]]),
+                        # den=np.array([[1, 1/AP.yaw_damper_tau_r]]),
+                        # Ts=ts_control)
 
         # instantiate lateral controllers
         self.pitch_from_elevator = pdControlWithRate(

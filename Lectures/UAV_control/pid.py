@@ -1,6 +1,6 @@
 import numpy as np
 class PIDControl:
-    def __init__(self, kp, ki, kd, limit, sigma, Ts, flag=True):
+    def __init__(self, kp=0.0, ki=0.0, kd=0.0, Ts=0.01, sigma=0.05, limit=1.0, flag=True):
         self.kp = kp # Proportional control gain
         self.ki = ki # Integral control gain
         self.kd = kd # Derivative control gain

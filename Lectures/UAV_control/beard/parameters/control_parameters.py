@@ -1,51 +1,62 @@
 import sys
 sys.path.append('..')
 import numpy as np
-import model_coef as TF
+# import chap5.transfer_function_coef as TF
 import parameters.aerosonde_parameters as MAV
 
-gravity = MAV.gravity  # gravity constant
-rho = MAV.rho  # density of air
-sigma = 0.1  # low pass filter gain for derivative
-Va0 = TF.Va_trim
+gravity = MAV.gravity
+sigma = 0.05
+Va0 = MAV.Va0
 
 #----------roll loop-------------
-# get transfer function data for delta_a to phi
-wn_roll = 50
-zeta_roll = 0.707
-max_ail = np.radians(45)
-max_roll = np.radians(30)
-roll_kp = max_ail/max_roll
-roll_kd = (2*zeta_roll*wn_roll-MAV.a_phi_1)/MAV.a_phi_2
+wn_phi = 11
+zeta_phi = 0.707
+a_phi_2 = 130.6
+a_phi_1 = 22.6
 
-Wx = 10
+roll_kp = wn_phi**2./a_phi_2
+roll_kd = (2.*zeta_phi*wn_phi-a_phi_1)/a_phi_2
 
 #----------course loop-------------
-wn_course = wn_roll/Wx
-zeta_course = 0.707
-course_kp = 2*zeta_course*wn_course*MAV.Va0/9.81
-course_ki = wn_course**2*MAV.Va0/9.81
+zeta_chi = 0.707
+wn_chi = 0.5
 
-#----------yaw damper-------------
-yaw_damper_tau_r =1
-yaw_damper_kp =1
+course_kp = 2.*zeta_chi*wn_chi*Va0/gravity
+course_ki = wn_chi**2.*Va0/gravity
+
+#----------sideslip loop-------------
+sideslip_ki = 0 # Fix this later
+sideslip_kp = 1 #Fix this later, too
+
+# #----------yaw damper-------------
+# yaw_damper_tau_r =
+# yaw_damper_kp =
 
 #----------pitch loop-------------
-wn_pitch =1
-zeta_pitch = 0.707
-pitch_kp =1
-pitch_kd =1
-K_theta_DC =1
+wn_theta = 15
+zeta_theta = 0.8
+
+a_theta_1 = 5.288
+a_theta_2 = 99.7
+a_theta_3 = -36.02
+
+pitch_kp = (wn_theta**2.-a_theta_2)/a_theta_3
+pitch_kd = (2.*zeta_theta*wn_theta - a_theta_1)/a_theta_3
+K_theta_DC = pitch_kp*a_theta_3/wn_theta**2.
 
 #----------altitude loop-------------
-wn_altitude = 2
-zeta_altitude = 0.707
-altitude_kp = 1
-altitude_ki = 0
-altitude_zone = 0   # moving saturation limit around current altitude
+zeta_h = 0.8
+wn_h = 0.25
+
+altitude_kp = (2.*zeta_h*wn_h)/(K_theta_DC*Va0)
+altitude_ki = (wn_h**2.)/(K_theta_DC*Va0)
+altitude_zone = 10
 
 #---------airspeed hold using throttle---------------
-wn_airspeed_throttle =1
-zeta_airspeed_throttle = 0.707
-airspeed_throttle_kp =1
-airspeed_throttle_ki =1
+wn_v = 0.5
+zeta_v = 0.8#707
+a_v_1 = 0.6607
+a_v_2 = 47.02
+
+airspeed_throttle_kp = (2.*zeta_v*wn_v-a_v_1)/a_v_2
+airspeed_throttle_ki = wn_v**2./a_v_2
